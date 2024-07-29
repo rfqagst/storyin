@@ -28,8 +28,8 @@ class Story {
       description: json['description'],
       photoUrl: json['photoUrl'],
       createdAt: json['createdAt'],
-      lat: json['lat'] != null ? json['lat'].toDouble() : null,
-      lon: json['lon'] != null ? json['lon'].toDouble() : null,
+      lat: json['lat']?.toDouble(),
+      lon: json['lon']?.toDouble(),
     );
   }
 

@@ -1,8 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:storyin/data/api/api_service.dart';
 import 'package:storyin/data/db/auth_repository.dart';
 import 'package:storyin/data/model/story.dart';
 import 'package:storyin/data/model/user.dart';
+import 'package:storyin/utils/post_state.dart';
 import 'package:storyin/utils/result_state.dart';
 
 class StoryProvider extends ChangeNotifier {
@@ -14,10 +18,14 @@ class StoryProvider extends ChangeNotifier {
     _stories = [];
     _storyDetail = null;
     _state = ResultState.idle;
+    _postState = PostState.idle;
   }
 
   late ResultState _state;
   ResultState get state => _state;
+
+  late PostState _postState;
+  PostState get postState => _postState;
 
   late String _message;
   String get message => _message;
@@ -27,6 +35,9 @@ class StoryProvider extends ChangeNotifier {
 
   Story? _storyDetail;
   Story? get storyDetail => _storyDetail;
+
+  XFile? imageFile;
+  String? imagePath;
 
   Future<void> fetchStories() async {
     _state = ResultState.loading;
@@ -38,6 +49,7 @@ class StoryProvider extends ChangeNotifier {
         _stories = storiesResponse.listStory;
         _state = ResultState.hasData;
       } else {
+        _message = "User is not logged in";
         throw Exception('User is not logged in');
       }
     } catch (e) {
@@ -62,6 +74,51 @@ class StoryProvider extends ChangeNotifier {
       }
     } catch (e) {
       _state = ResultState.error;
+      _message = e.toString();
+    }
+    notifyListeners();
+  }
+
+  void setImageFile(XFile? value) {
+    imageFile = value;
+    notifyListeners();
+  }
+
+  void setImagePath(String? value) {
+    imagePath = value;
+    notifyListeners();
+  }
+
+  Future<void> postStory({
+    required String description,
+    required File photo,
+    double? lat,
+    double? lon,
+  }) async {
+    _postState = PostState.loading;
+    notifyListeners();
+
+    try {
+      final User? user = await authRepository.getUser();
+      if (user != null && user.token != null) {
+        final response = await apiService.postStory(
+            token: user.token!, description: description, photo: photo);
+
+        if (response['error'] == false) {
+          _postState = PostState.success;
+          _message = response['message'];
+        } else {
+          _postState = PostState.error; 
+          _message = response['message']; 
+          throw Exception('Error in posting story');
+        }
+      } else {
+        _postState = PostState.error; 
+        _message = "User is not logged in"; 
+        throw Exception('User is not logged in');
+      }
+    } catch (e) {
+      _postState = PostState.error; 
       _message = e.toString();
     }
     notifyListeners();
