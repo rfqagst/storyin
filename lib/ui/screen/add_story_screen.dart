@@ -19,25 +19,44 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
   String _resultText = '';
   Color _resultColor = Colors.black;
 
-  @override
-  void initState() {
-    super.initState();
+  StoryProvider? _provider;
 
-    // Adding a listener to the provider to update the UI when the state changes
-    final provider = context.read<StoryProvider>();
-    provider.addListener(() {
-      if (provider.postState == PostState.success) {
-        setState(() {
-          _resultText = provider.message;
-          _resultColor = Colors.green;
-        });
-      } else if (provider.postState == PostState.error) {
-        setState(() {
-          _resultText = provider.message;
-          _resultColor = Colors.red;
-        });
-      }
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _provider = context.read<StoryProvider>();
+
+    _provider!.addListener(_onProviderStateChanged);
+
+    setState(() {
+      _resultText = '';
+      _resultColor = Colors.black;
     });
+  }
+
+  void _onProviderStateChanged() {
+    final provider = _provider;
+
+    if (provider == null || !mounted) return;
+
+    if (provider.postState == PostState.success) {
+      setState(() {
+        _resultText = provider.message;
+        _resultColor = Colors.green;
+      });
+    } else if (provider.postState == PostState.error) {
+      setState(() {
+        _resultText = provider.message;
+        _resultColor = Colors.red;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _provider?.removeListener(_onProviderStateChanged);
+    _descriptionController.dispose();
+    super.dispose();
   }
 
   @override
@@ -85,7 +104,7 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
                       ),
               ),
             ),
-            const SizedBox(height: 60),
+            const SizedBox(height: 30),
             TextField(
               minLines: 5,
               maxLines: 10,
@@ -101,7 +120,7 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
               _resultText,
               style: TextStyle(fontSize: 16, color: _resultColor),
             ),
-            const SizedBox(height: 30),
+            const SizedBox(height: 20),
             Consumer<StoryProvider>(builder: (context, provider, child) {
               return SizedBox(
                 width: double.infinity,

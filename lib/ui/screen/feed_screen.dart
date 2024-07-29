@@ -8,14 +8,12 @@ import 'package:storyin/utils/auth_state.dart';
 import 'package:storyin/utils/result_state.dart';
 
 class FeedScreen extends StatefulWidget {
-  final List<Story> stories;
   final Function(String) onTapped;
   final Function() onLogout;
   final Function() onAddStory;
 
   const FeedScreen({
     super.key,
-    required this.stories,
     required this.onLogout,
     required this.onTapped,
     required this.onAddStory,
@@ -29,11 +27,13 @@ class _FeedScreenState extends State<FeedScreen> {
   @override
   void initState() {
     super.initState();
-    if (widget.stories.isEmpty) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        Provider.of<StoryProvider>(context, listen: false).fetchStories();
-      });
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<StoryProvider>(context, listen: false).fetchStories();
+    });
+  }
+
+  Future<void> _refreshStories() async {
+    await Provider.of<StoryProvider>(context, listen: false).fetchStories();
   }
 
   @override
@@ -75,9 +75,10 @@ class _FeedScreenState extends State<FeedScreen> {
           } else if (provider.state == ResultState.error) {
             return Center(child: Text(provider.message));
           } else if (provider.state == ResultState.hasData) {
-            return Expanded(
+            return RefreshIndicator(
+              onRefresh: _refreshStories,
               child: ListView.builder(
-                itemCount: widget.stories.length,
+                itemCount: provider.stories.length,
                 itemBuilder: (context, index) {
                   final story = provider.stories[index];
                   return FeedCard(

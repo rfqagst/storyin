@@ -19,10 +19,13 @@ class MyRouterDelegate extends RouterDelegate
   }
 
   _init() async {
+    isLoading = true;
     isLoggedIn = await authRepository.isLoggedIn();
     if (isLoggedIn == true) {
       await storyProvider.fetchStories();
     }
+    isLoading = false;
+
     notifyListeners();
   }
 
@@ -30,6 +33,17 @@ class MyRouterDelegate extends RouterDelegate
   bool? isLoggedIn;
   bool isRegister = false;
   bool isAddingStory = false;
+  bool isLoading = false;
+
+  List<Page> get _loadingStack => [
+        const MaterialPage(
+          child: Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(),
+            ),
+          ),
+        ),
+      ];
 
   List<Page> get _loggedOutStack => [
         MaterialPage(
@@ -69,7 +83,6 @@ class MyRouterDelegate extends RouterDelegate
               isLoggedIn = false;
               notifyListeners();
             },
-            stories: storyProvider.stories,
             onTapped: (storyId) {
               selectedStory = storyId;
               storyProvider.fetchStoryDetail(storyId);
@@ -97,7 +110,9 @@ class MyRouterDelegate extends RouterDelegate
 
   @override
   Widget build(BuildContext context) {
-    if (isLoggedIn == true) {
+    if (isLoading) {
+      historyStack = _loadingStack;
+    } else if (isLoggedIn == true) {
       historyStack = _loggedInStack;
     } else {
       historyStack = _loggedOutStack;
