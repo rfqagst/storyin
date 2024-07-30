@@ -50,11 +50,24 @@ class ApiService {
 
   Future<StoriesResponse> getStories({
     required String token,
+    int page = 1,
+    int size = 10,
+    int location = 0,
   }) async {
     final url = Uri.parse('$_baseUrl/stories');
-    final response = await http.get(url, headers: {
+
+    final queryParameters = <String, String>{
+      'page': page.toString(),
+      'size': size.toString(),
+      'location': location.toString(),
+    };
+
+    final finalUrl = url.replace(queryParameters: queryParameters);
+
+    final response = await http.get(finalUrl, headers: {
       'Authorization': 'Bearer $token',
     });
+
     if (response.statusCode == 200) {
       return StoriesResponse.fromJson(
         jsonDecode(response.body),

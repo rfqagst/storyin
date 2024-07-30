@@ -46,7 +46,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    const SizedBox(height: 10),
+                    SizedBox(height: 10),
                     Text(
                       'Selamat datang kembali!',
                       style: TextStyle(

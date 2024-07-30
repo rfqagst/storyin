@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:storyin/data/model/story.dart';
 import 'package:storyin/provider/auth_provider.dart';
+import 'package:storyin/provider/story_provider.dart';
 import 'package:storyin/provider/story_provider.dart';
 import 'package:storyin/ui/widget/feed_card.dart';
 import 'package:storyin/utils/auth_state.dart';
@@ -24,16 +24,35 @@ class FeedScreen extends StatefulWidget {
 }
 
 class _FeedScreenState extends State<FeedScreen> {
+  final ScrollController scrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<StoryProvider>(context, listen: false).fetchStories();
+    final storyProvider = context.read<StoryProvider>();
+
+    scrollController.addListener(() {
+      if (scrollController.position.pixels >=
+          scrollController.position.maxScrollExtent) {
+        if (storyProvider.pageItems != null) {
+          storyProvider.fetchStories();
+        }
+      }
     });
+
+    Future.microtask(() async => storyProvider.fetchStories());
+  }
+
+  @override
+  void dispose() {
+    scrollController.dispose();
+    super.dispose();
   }
 
   Future<void> _refreshStories() async {
-    await Provider.of<StoryProvider>(context, listen: false).fetchStories();
+    final storyProvider = Provider.of<StoryProvider>(context, listen: false);
+    storyProvider.resetPage();
+    await storyProvider.fetchStories();
   }
 
   @override
@@ -78,8 +97,21 @@ class _FeedScreenState extends State<FeedScreen> {
             return RefreshIndicator(
               onRefresh: _refreshStories,
               child: ListView.builder(
-                itemCount: provider.stories.length,
+                controller: scrollController,
+                itemCount: provider.stories.length +
+                    (provider.pageItems != null ? 1 : 0),
                 itemBuilder: (context, index) {
+                  final stories = provider.stories;
+
+                  if (index == stories.length && provider.pageItems != null) {
+                    return const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(8),
+                        child: CircularProgressIndicator(),
+                      ),
+                    );
+                  }
+
                   final story = provider.stories[index];
                   return FeedCard(
                     story: story,

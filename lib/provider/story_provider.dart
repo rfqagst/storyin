@@ -39,15 +39,33 @@ class StoryProvider extends ChangeNotifier {
   XFile? imageFile;
   String? imagePath;
 
+  int? pageItems = 1;
+  int sizeItems = 10;
+
+  void resetPage() {
+    pageItems = 1;
+  }
+
   Future<void> fetchStories() async {
-    _state = ResultState.loading;
-    notifyListeners();
     try {
       final User? user = await authRepository.getUser();
       if (user != null && user.token != null) {
-        final storiesResponse = await apiService.getStories(token: user.token!);
+        if (pageItems == 1) {
+          _state = ResultState.loading;
+          notifyListeners();
+        }
+        final storiesResponse = await apiService.getStories(
+            token: user.token!, page: pageItems!, size: sizeItems);
         _stories = storiesResponse.listStory;
         _state = ResultState.hasData;
+
+        if (storiesResponse.listStory.length < sizeItems) {
+          pageItems = null;
+        } else {
+          pageItems = pageItems! + 1;
+        }
+
+        notifyListeners();
       } else {
         _message = "User is not logged in";
         throw Exception('User is not logged in');
@@ -108,17 +126,17 @@ class StoryProvider extends ChangeNotifier {
           _postState = PostState.success;
           _message = response['message'];
         } else {
-          _postState = PostState.error; 
-          _message = response['message']; 
+          _postState = PostState.error;
+          _message = response['message'];
           throw Exception('Error in posting story');
         }
       } else {
-        _postState = PostState.error; 
-        _message = "User is not logged in"; 
+        _postState = PostState.error;
+        _message = "User is not logged in";
         throw Exception('User is not logged in');
       }
     } catch (e) {
-      _postState = PostState.error; 
+      _postState = PostState.error;
       _message = e.toString();
     }
     notifyListeners();

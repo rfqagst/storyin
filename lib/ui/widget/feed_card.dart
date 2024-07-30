@@ -2,21 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:storyin/data/model/story.dart';
 import 'package:storyin/utils/time_formatter.dart';
 
-class FeedCard extends StatefulWidget {
+class FeedCard extends StatelessWidget {
   final Story story;
   final Function(String) onTapped;
 
   const FeedCard({super.key, required this.story, required this.onTapped});
 
   @override
-  State<FeedCard> createState() => _FeedCardState();
-}
-
-class _FeedCardState extends State<FeedCard> {
-  @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => widget.onTapped(widget.story.id),
+      onTap: () => onTapped(story.id),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -25,7 +20,7 @@ class _FeedCardState extends State<FeedCard> {
             child: Row(
               children: [
                 CircleAvatar(
-                  backgroundImage: NetworkImage(widget.story.photoUrl),
+                  backgroundImage: NetworkImage(story.photoUrl),
                   radius: 25.0,
                 ),
                 const SizedBox(width: 8.0),
@@ -33,7 +28,7 @@ class _FeedCardState extends State<FeedCard> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      widget.story.name,
+                      story.name,
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -41,7 +36,7 @@ class _FeedCardState extends State<FeedCard> {
                       ),
                     ),
                     Text(
-                      timeAgo(widget.story.createdAt),
+                      timeAgo(story.createdAt),
                       style: const TextStyle(
                           fontSize: 14, color: Color(0xFF7E7777)),
                     ),
@@ -55,7 +50,7 @@ class _FeedCardState extends State<FeedCard> {
             height: 300.0,
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: NetworkImage(widget.story.photoUrl),
+                image: NetworkImage(story.photoUrl),
                 fit: BoxFit.cover,
               ),
             ),
@@ -69,7 +64,7 @@ class _FeedCardState extends State<FeedCard> {
               text: TextSpan(
                 children: [
                   TextSpan(
-                    text: "${widget.story.name}  ",
+                    text: "${story.name}  ",
                     style: const TextStyle(
                       fontWeight: FontWeight.w500,
                       fontSize: 16,
@@ -77,7 +72,7 @@ class _FeedCardState extends State<FeedCard> {
                     ),
                   ),
                   TextSpan(
-                    text: widget.story.description,
+                    text: story.description,
                     style: const TextStyle(
                       color: Color(0xff171515),
                       fontSize: 16,
