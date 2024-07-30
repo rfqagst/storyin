@@ -102,8 +102,15 @@ class MyRouterDelegate extends RouterDelegate
             ),
           ),
         if (isAddingStory)
-          const MaterialPage(
-              key: ValueKey("AddStoryScreen"), child: AddStoryScreen())
+          MaterialPage(
+              key: const ValueKey("AddStoryScreen"),
+              child: AddStoryScreen(
+                onStoryUploaded: () async {
+                  await storyProvider.fetchStories();
+                  isAddingStory = false;
+                  notifyListeners();
+                },
+              ))
       ];
 
   String? selectedStory;

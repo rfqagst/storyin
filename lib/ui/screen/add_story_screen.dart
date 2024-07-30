@@ -7,7 +7,8 @@ import 'package:storyin/provider/story_provider.dart';
 import 'package:storyin/utils/post_state.dart';
 
 class AddStoryScreen extends StatefulWidget {
-  const AddStoryScreen({super.key});
+  final Function() onStoryUploaded;
+  const AddStoryScreen({super.key, required this.onStoryUploaded});
 
   @override
   State<AddStoryScreen> createState() => _AddStoryScreenState();
@@ -178,6 +179,9 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
         description: _descriptionController.text,
         photo: _image!,
       );
+    }
+    if (provider.postState == PostState.success) {
+      widget.onStoryUploaded();
     }
   }
 }
