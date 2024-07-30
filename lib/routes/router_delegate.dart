@@ -5,6 +5,7 @@ import 'package:storyin/ui/screen/add_story_screen.dart';
 import 'package:storyin/ui/screen/auth/login_screen.dart';
 import 'package:storyin/ui/screen/auth/register_screen.dart';
 import 'package:storyin/ui/screen/feed_screen.dart';
+import 'package:storyin/ui/screen/map_screen.dart';
 import 'package:storyin/ui/screen/story_detail_screen.dart';
 
 class MyRouterDelegate extends RouterDelegate
@@ -33,7 +34,10 @@ class MyRouterDelegate extends RouterDelegate
   bool? isLoggedIn;
   bool isRegister = false;
   bool isAddingStory = false;
+  bool isShowMap = false;
   bool isLoading = false;
+  double? lat;
+  double? lon;
 
   List<Page> get _loadingStack => [
         const MaterialPage(
@@ -99,18 +103,33 @@ class MyRouterDelegate extends RouterDelegate
             key: ValueKey(selectedStory),
             child: StoryDetailScreen(
               storyId: selectedStory!,
+              isShowMap: (lat, lon) {
+                this.lat = lat;
+                this.lon = lon;
+                this.isShowMap = true;
+                notifyListeners();
+              },
             ),
           ),
         if (isAddingStory)
           MaterialPage(
-              key: const ValueKey("AddStoryScreen"),
-              child: AddStoryScreen(
-                onStoryUploaded: () async {
-                  await storyProvider.fetchStories();
-                  isAddingStory = false;
-                  notifyListeners();
-                },
-              ))
+            key: const ValueKey("AddStoryScreen"),
+            child: AddStoryScreen(
+              onStoryUploaded: () async {
+                await storyProvider.fetchStories();
+                isAddingStory = false;
+                notifyListeners();
+              },
+            ),
+          ),
+        if (isShowMap)
+          MaterialPage(
+            key: const ValueKey("MapScreen"),
+            child: MapScreen(
+              lat : lat!,
+              lon : lon!,
+            ),
+          ),
       ];
 
   String? selectedStory;
@@ -136,6 +155,7 @@ class MyRouterDelegate extends RouterDelegate
         isRegister = false;
         selectedStory = null;
         isAddingStory = false;
+        isShowMap = false;
         notifyListeners();
 
         return true;

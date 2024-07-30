@@ -6,7 +6,9 @@ import 'package:storyin/utils/time_formatter.dart';
 
 class StoryDetailScreen extends StatefulWidget {
   final String storyId;
-  const StoryDetailScreen({super.key, required this.storyId});
+  final Function(double, double) isShowMap;
+  const StoryDetailScreen(
+      {super.key, required this.storyId, required this.isShowMap});
 
   @override
   State<StoryDetailScreen> createState() => _StoryDetailScreenState();
@@ -24,6 +26,16 @@ class _StoryDetailScreenState extends State<StoryDetailScreen> {
       appBar: AppBar(
         centerTitle: true,
         title: const Text("Detail Story"),
+        actions: [
+          IconButton(
+              onPressed: () {
+                final story = context.read<StoryProvider>().storyDetail;
+                if (story != null && story.lat != null && story.lon != null) {
+                  widget.isShowMap(story.lat!, story.lon!);
+                }
+              },
+              icon: const Icon(Icons.location_on))
+        ],
       ),
       body: Consumer<StoryProvider>(
         builder: (context, provider, child) {
@@ -102,6 +114,7 @@ class _StoryDetailScreenState extends State<StoryDetailScreen> {
                               style: const TextStyle(fontSize: 16),
                             ),
                           ),
+                          if (story.lon != null && story.lat != null) ...[]
                         ],
                       ),
                     ),
