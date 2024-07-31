@@ -26,15 +26,29 @@ class _StoryDetailScreenState extends State<StoryDetailScreen> {
       appBar: AppBar(
         centerTitle: true,
         title: const Text("Detail Story"),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(color: Colors.white, boxShadow: [
+            BoxShadow(
+                color: Color.fromARGB(19, 99, 98, 98),
+                offset: Offset(0, 4),
+                blurRadius: 10)
+          ]),
+        ),
         actions: [
           IconButton(
-              onPressed: () {
-                final story = context.read<StoryProvider>().storyDetail;
-                if (story != null && story.lat != null && story.lon != null) {
-                  widget.isShowMap(story.lat!, story.lon!);
-                }
-              },
-              icon: const Icon(Icons.location_on))
+            onPressed: () {
+              final story = context.read<StoryProvider>().storyDetail;
+              if (story != null && story.lat != null && story.lon != null) {
+                widget.isShowMap(story.lat!, story.lon!);
+              }
+            },
+            icon: const Icon(
+              Icons.location_on,
+              color: Color(0xFF10439F),
+            ),
+          )
         ],
       ),
       body: Consumer<StoryProvider>(

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:location/location.dart';
 import 'package:storyin/data/db/auth_repository.dart';
 import 'package:storyin/provider/story_provider.dart';
+import 'package:storyin/routes/page_manager.dart';
 import 'package:storyin/ui/screen/add_story_screen.dart';
 import 'package:storyin/ui/screen/auth/login_screen.dart';
 import 'package:storyin/ui/screen/auth/register_screen.dart';
@@ -40,6 +42,7 @@ class MyRouterDelegate extends RouterDelegate
   bool isLoading = false;
   double? lat;
   double? lon;
+  PickedLocation? selectedLocation;
 
   List<Page> get _loadingStack => [
         const MaterialPage(
@@ -122,7 +125,7 @@ class MyRouterDelegate extends RouterDelegate
                 isAddingStory = false;
                 notifyListeners();
               },
-              isPickLocation: () {
+              toPickLocation: () {
                 isPickLocation = true;
                 notifyListeners();
               },
@@ -140,8 +143,10 @@ class MyRouterDelegate extends RouterDelegate
           MaterialPage(
             key: const ValueKey("PickMapScreen"),
             child: PickMapScreen(
-              onPickedLocation: () {
-                
+              onPickedLocation: (locationData) {
+                selectedLocation = locationData;
+                isPickLocation = false;
+                notifyListeners();
               },
             ),
           ),
@@ -172,7 +177,6 @@ class MyRouterDelegate extends RouterDelegate
         isAddingStory = false;
         isShowMap = false;
         isPickLocation = false;
-
 
         notifyListeners();
 

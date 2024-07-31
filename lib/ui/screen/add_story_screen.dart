@@ -4,13 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:storyin/provider/story_provider.dart';
+import 'package:storyin/routes/page_manager.dart';
 import 'package:storyin/utils/post_state.dart';
 
 class AddStoryScreen extends StatefulWidget {
   final Function() onStoryUploaded;
-  final Function() isPickLocation;
+  final Function() toPickLocation;
   const AddStoryScreen(
-      {super.key, required this.onStoryUploaded, required this.isPickLocation});
+      {super.key, required this.onStoryUploaded, required this.toPickLocation});
 
   @override
   State<AddStoryScreen> createState() => _AddStoryScreenState();
@@ -23,6 +24,7 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
 
   String _resultText = '';
   Color _resultColor = Colors.black;
+  PickedLocation? _pickedLocation;
 
   StoryProvider? _provider;
 
@@ -70,6 +72,16 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
       appBar: AppBar(
         title: const Text("Upload Story"),
         centerTitle: true,
+        backgroundColor: Colors.white,
+        elevation: 0,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(color: Colors.white, boxShadow: [
+            BoxShadow(
+                color: Color.fromARGB(19, 99, 98, 98),
+                offset: Offset(0, 4),
+                blurRadius: 10)
+          ]),
+        ),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -132,8 +144,15 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.map),
                   color: const Color(0xFF10439F),
-                  onPressed: () {
-                    widget.isPickLocation();
+                  onPressed: () async {
+                    final pageManager = context.read<PageManager>();
+                    widget.toPickLocation();
+                    final pickedLocation = await pageManager.waitForResult();
+
+                    setState(() {
+                      _pickedLocation = pickedLocation;
+                      _locationController.text = pickedLocation.address;
+                    });
                   },
                 ),
               ),

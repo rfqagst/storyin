@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:storyin/provider/auth_provider.dart';
 import 'package:storyin/provider/story_provider.dart';
-import 'package:storyin/provider/story_provider.dart';
 import 'package:storyin/ui/widget/feed_card.dart';
 import 'package:storyin/utils/auth_state.dart';
 import 'package:storyin/utils/result_state.dart';
@@ -81,7 +80,10 @@ class _FeedScreenState extends State<FeedScreen> {
                     ? const CircularProgressIndicator(
                         color: Color(0xFF10439F),
                       )
-                    : const Icon(Icons.logout),
+                    : const Icon(
+                        Icons.logout,
+                        color: Colors.red,
+                      ),
               );
             },
           ),

@@ -1,16 +1,24 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class PageManager extends ChangeNotifier {
-  late Completer<String> _completer;
+  late Completer<PickedLocation> _completer;
 
-  Future<String> waitForResult() async {
-    _completer = Completer<String>();
+  Future<PickedLocation> waitForResult() async {
+    _completer = Completer<PickedLocation>();
     return _completer.future;
   }
 
-  void returnData(String value) {
+  void returnData(PickedLocation value) {
     _completer.complete(value);
   }
+}
+
+class PickedLocation {
+  final LatLng latLng;
+  final String address;
+
+  PickedLocation(this.latLng, this.address);
 }

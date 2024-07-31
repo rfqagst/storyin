@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:location/location.dart';
 import 'package:geocoding/geocoding.dart' as geo;
+import 'package:location/location.dart';
+import 'package:provider/provider.dart';
+import 'package:storyin/routes/page_manager.dart';
 
 class PickMapScreen extends StatefulWidget {
-  final Function() onPickedLocation;
+  final Function(PickedLocation) onPickedLocation;
   const PickMapScreen({super.key, required this.onPickedLocation});
 
   @override
@@ -15,10 +17,18 @@ class _PickMapScreenState extends State<PickMapScreen> {
   late GoogleMapController mapController;
   late final Set<Marker> markers = {};
 
-  final dicodingOffice = const LatLng(-6.8957473, 107.6337669);
-
   geo.Placemark? placemark;
   String? selectedAddress;
+  String? selectedStreet;
+  LatLng? userLocation;
+
+  bool _isLoadingLocation = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _getUserLocation();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,6 +36,16 @@ class _PickMapScreenState extends State<PickMapScreen> {
       appBar: AppBar(
         centerTitle: true,
         title: const Text("Pick Location"),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(color: Colors.white, boxShadow: [
+            BoxShadow(
+                color: Color.fromARGB(19, 99, 98, 98),
+                offset: Offset(0, 4),
+                blurRadius: 10)
+          ]),
+        ),
       ),
       body: Center(
         child: Column(
@@ -33,36 +53,27 @@ class _PickMapScreenState extends State<PickMapScreen> {
             Expanded(
               child: Stack(
                 children: [
-                  GoogleMap(
-                    initialCameraPosition: const CameraPosition(
-                      zoom: 18,
-                      target: LatLng(-6.938109860738086, 110.91474202390091),
+                  if (userLocation != null)
+                    GoogleMap(
+                      initialCameraPosition: CameraPosition(
+                        zoom: 18,
+                        target: userLocation!,
+                      ),
+                      myLocationButtonEnabled: true,
+                      zoomControlsEnabled: true,
+                      myLocationEnabled: true,
+                      markers: markers,
+                      onMapCreated: (GoogleMapController controller) async {
+                        mapController = controller;
+                      },
+                      onLongPress: (LatLng latLng) {
+                        onLongPressGoogleMap(latLng);
+                      },
+                    )
+                  else
+                    const Center(
+                      child: CircularProgressIndicator(),
                     ),
-                    myLocationButtonEnabled: true,
-                    zoomControlsEnabled: true,
-                    myLocationEnabled: true,
-                    markers: markers,
-                    onMapCreated: (GoogleMapController controller) async {
-                      mapController = controller;
-
-                      final myLocation = await getMyLocation();
-                      if (myLocation != null) {
-                        final info = await geo.placemarkFromCoordinates(
-                            myLocation.latitude, myLocation.longitude);
-                        final place = info[0];
-                        final street = place.street!;
-                        final address =
-                            '${place.subLocality}, ${place.locality}, ${place.postalCode}, ${place.country}';
-                        setState(() {
-                          placemark = place;
-                        });
-                        defineMarker(myLocation, street, address);
-                      }
-                    },
-                    onLongPress: (LatLng latLng) {
-                      onLongPressGoogleMap(latLng);
-                    },
-                  ),
                 ],
               ),
             ),
@@ -70,8 +81,9 @@ class _PickMapScreenState extends State<PickMapScreen> {
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Text(
-                  'Selected Address: $selectedAddress',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  'Selected Address: $selectedStreet $selectedAddress',
+                  style: const TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -81,8 +93,18 @@ class _PickMapScreenState extends State<PickMapScreen> {
                 width: double.infinity,
                 height: 55,
                 child: OutlinedButton(
-                  onPressed:
-                      selectedAddress != null ? widget.onPickedLocation : null,
+                  onPressed: () {
+                    if (selectedAddress != null && userLocation != null) {
+                      final locationData =
+                          PickedLocation (userLocation!, selectedAddress!);
+                      widget.onPickedLocation(locationData);
+                      context.read<PageManager>().returnData(locationData);
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                        content: Text("Please select a location first."),
+                      ));
+                    }
+                  },
                   style: OutlinedButton.styleFrom(
                     backgroundColor: const Color(0xFF10439F),
                     shape: RoundedRectangleBorder(
@@ -104,32 +126,42 @@ class _PickMapScreenState extends State<PickMapScreen> {
     );
   }
 
-  Future<LatLng?> getMyLocation() async {
-    final Location location = Location();
-    bool serviceEnabled;
-    PermissionStatus permissionGranted;
-    LocationData locationData;
-
-    serviceEnabled = await location.serviceEnabled();
-    if (!serviceEnabled) {
-      serviceEnabled = await location.requestService();
+  Future<void> _getUserLocation() async {
+    try {
+      final location = Location();
+      final serviceEnabled = await location.serviceEnabled();
       if (!serviceEnabled) {
-        print("Location services is not available");
-        return null;
+        await location.requestService();
       }
-    }
 
-    permissionGranted = await location.hasPermission();
-    if (permissionGranted == PermissionStatus.denied) {
-      permissionGranted = await location.requestPermission();
-      if (permissionGranted != PermissionStatus.granted) {
-        print("Location permission is denied");
-        return null;
+      final permissionGranted = await location.hasPermission();
+      if (permissionGranted == PermissionStatus.denied) {
+        await location.requestPermission();
       }
-    }
 
-    locationData = await location.getLocation();
-    return LatLng(locationData.latitude!, locationData.longitude!);
+      final locationData = await location.getLocation();
+      userLocation = LatLng(locationData.latitude!, locationData.longitude!);
+
+      final info = await geo.placemarkFromCoordinates(
+          userLocation!.latitude, userLocation!.longitude);
+      final place = info[0];
+      selectedAddress =
+          '${place.subLocality}, ${place.locality}, ${place.postalCode}, ${place.country}';
+      selectedStreet = place.street;
+
+      setState(() {
+        placemark = place;
+        _isLoadingLocation = false;
+      });
+      defineMarker(userLocation!, selectedStreet!, selectedAddress!);
+    } catch (e) {
+      print('Error getting location: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Terjadi kesalahan saat mengambil lokasi.'),
+        ),
+      );
+    }
   }
 
   void defineMarker(LatLng latLng, String street, String address) {
@@ -160,6 +192,7 @@ class _PickMapScreenState extends State<PickMapScreen> {
     setState(() {
       placemark = place;
       selectedAddress = address;
+      selectedStreet = street;
     });
 
     mapController.animateCamera(
@@ -167,3 +200,4 @@ class _PickMapScreenState extends State<PickMapScreen> {
     );
   }
 }
+
