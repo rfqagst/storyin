@@ -5,7 +5,8 @@ import 'package:storyin/ui/screen/add_story_screen.dart';
 import 'package:storyin/ui/screen/auth/login_screen.dart';
 import 'package:storyin/ui/screen/auth/register_screen.dart';
 import 'package:storyin/ui/screen/feed_screen.dart';
-import 'package:storyin/ui/screen/map_screen.dart';
+import 'package:storyin/ui/screen/map/map_screen.dart';
+import 'package:storyin/ui/screen/map/pick_map_screen.dart';
 import 'package:storyin/ui/screen/story_detail_screen.dart';
 
 class MyRouterDelegate extends RouterDelegate
@@ -35,6 +36,7 @@ class MyRouterDelegate extends RouterDelegate
   bool isRegister = false;
   bool isAddingStory = false;
   bool isShowMap = false;
+  bool isPickLocation = false;
   bool isLoading = false;
   double? lat;
   double? lon;
@@ -106,7 +108,7 @@ class MyRouterDelegate extends RouterDelegate
               isShowMap: (lat, lon) {
                 this.lat = lat;
                 this.lon = lon;
-                this.isShowMap = true;
+                isShowMap = true;
                 notifyListeners();
               },
             ),
@@ -120,14 +122,27 @@ class MyRouterDelegate extends RouterDelegate
                 isAddingStory = false;
                 notifyListeners();
               },
+              isPickLocation: () {
+                isPickLocation = true;
+                notifyListeners();
+              },
             ),
           ),
         if (isShowMap)
           MaterialPage(
             key: const ValueKey("MapScreen"),
             child: MapScreen(
-              lat : lat!,
-              lon : lon!,
+              lat: lat!,
+              lon: lon!,
+            ),
+          ),
+        if (isPickLocation)
+          MaterialPage(
+            key: const ValueKey("PickMapScreen"),
+            child: PickMapScreen(
+              onPickedLocation: () {
+                
+              },
             ),
           ),
       ];
@@ -156,6 +171,9 @@ class MyRouterDelegate extends RouterDelegate
         selectedStory = null;
         isAddingStory = false;
         isShowMap = false;
+        isPickLocation = false;
+
+
         notifyListeners();
 
         return true;

@@ -8,7 +8,9 @@ import 'package:storyin/utils/post_state.dart';
 
 class AddStoryScreen extends StatefulWidget {
   final Function() onStoryUploaded;
-  const AddStoryScreen({super.key, required this.onStoryUploaded});
+  final Function() isPickLocation;
+  const AddStoryScreen(
+      {super.key, required this.onStoryUploaded, required this.isPickLocation});
 
   @override
   State<AddStoryScreen> createState() => _AddStoryScreenState();
@@ -17,6 +19,8 @@ class AddStoryScreen extends StatefulWidget {
 class _AddStoryScreenState extends State<AddStoryScreen> {
   File? _image;
   final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _locationController = TextEditingController();
+
   String _resultText = '';
   Color _resultColor = Colors.black;
 
@@ -117,6 +121,24 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
               ),
             ),
             const SizedBox(height: 30),
+            TextField(
+              readOnly: true,
+              controller: _locationController,
+              decoration: InputDecoration(
+                labelText: "Pick Location",
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.map),
+                  color: const Color(0xFF10439F),
+                  onPressed: () {
+                    widget.isPickLocation();
+                  },
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
             Text(
               _resultText,
               style: TextStyle(fontSize: 16, color: _resultColor),

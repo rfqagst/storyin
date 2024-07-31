@@ -5,6 +5,7 @@ import 'package:storyin/data/api/api_service.dart';
 import 'package:storyin/data/db/auth_repository.dart';
 import 'package:storyin/provider/auth_provider.dart';
 import 'package:storyin/provider/story_provider.dart';
+import 'package:storyin/routes/page_manager.dart';
 import 'package:storyin/routes/router_delegate.dart';
 
 void main() {
@@ -47,6 +48,9 @@ class _MainAppState extends State<MainApp> {
         ),
         ChangeNotifierProvider<StoryProvider>(
           create: (context) => storyProvider,
+        ),
+        ChangeNotifierProvider<PageManager>(
+          create: (context) => PageManager(),
         ),
       ],
       child: MaterialApp(
