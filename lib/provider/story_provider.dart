@@ -56,7 +56,11 @@ class StoryProvider extends ChangeNotifier {
         }
         final storiesResponse = await apiService.getStories(
             token: user.token!, page: pageItems!, size: sizeItems);
-        _stories = storiesResponse.listStory;
+        if (pageItems == 1) {
+          _stories = storiesResponse.listStory;
+        } else {
+          _stories.addAll(storiesResponse.listStory);
+        }
         _state = ResultState.hasData;
 
         if (storiesResponse.listStory.length < sizeItems) {
@@ -120,7 +124,11 @@ class StoryProvider extends ChangeNotifier {
       final User? user = await authRepository.getUser();
       if (user != null && user.token != null) {
         final response = await apiService.postStory(
-            token: user.token!, description: description, photo: photo);
+            token: user.token!,
+            description: description,
+            photo: photo,
+            lat: lat,
+            lon: lon);
 
         if (response['error'] == false) {
           _postState = PostState.success;
@@ -139,6 +147,15 @@ class StoryProvider extends ChangeNotifier {
       _postState = PostState.error;
       _message = e.toString();
     }
+    notifyListeners();
+    _resetPostState();
+  }
+
+  void _resetPostState() {
+    _postState = PostState.idle;
+    _message = '';
+    pageItems = 1;
+    _stories = [];
     notifyListeners();
   }
 }

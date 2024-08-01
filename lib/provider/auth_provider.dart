@@ -84,5 +84,4 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
     return !isLoggedIn;
   }
-
 }

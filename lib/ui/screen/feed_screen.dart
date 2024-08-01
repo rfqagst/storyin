@@ -24,22 +24,33 @@ class FeedScreen extends StatefulWidget {
 
 class _FeedScreenState extends State<FeedScreen> {
   final ScrollController scrollController = ScrollController();
+  bool isFetching = false;
 
   @override
   void initState() {
     super.initState();
     final storyProvider = context.read<StoryProvider>();
 
-    scrollController.addListener(() {
+    scrollController.addListener(() async {
       if (scrollController.position.pixels >=
-          scrollController.position.maxScrollExtent) {
-        if (storyProvider.pageItems != null) {
-          storyProvider.fetchStories();
+          scrollController.position.maxScrollExtent - 100) {
+        if (!isFetching && storyProvider.pageItems != null) {
+          isFetching = true;
+          await storyProvider.fetchStories();
+          scrollController.animateTo(
+            scrollController.position.pixels + 100,
+            duration: const Duration(milliseconds: 500),
+            curve: Curves.easeOut,
+          );
+          isFetching = false;
         }
       }
     });
 
-    Future.microtask(() async => storyProvider.fetchStories());
+    Future.microtask(() async {
+      storyProvider.resetPage();
+      await storyProvider.fetchStories();
+    });
   }
 
   @override

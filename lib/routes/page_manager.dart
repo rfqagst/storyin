@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class PageManager extends ChangeNotifier {
   late Completer<PickedLocation> _completer;
@@ -17,8 +16,9 @@ class PageManager extends ChangeNotifier {
 }
 
 class PickedLocation {
-  final LatLng latLng;
+  final double latitude;
+  final double longitude;
   final String address;
 
-  PickedLocation(this.latLng, this.address);
+  PickedLocation(this.latitude, this.longitude, this.address);
 }

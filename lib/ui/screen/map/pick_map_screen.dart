@@ -22,8 +22,6 @@ class _PickMapScreenState extends State<PickMapScreen> {
   String? selectedStreet;
   LatLng? userLocation;
 
-  bool _isLoadingLocation = true;
-
   @override
   void initState() {
     super.initState();
@@ -95,8 +93,10 @@ class _PickMapScreenState extends State<PickMapScreen> {
                 child: OutlinedButton(
                   onPressed: () {
                     if (selectedAddress != null && userLocation != null) {
-                      final locationData =
-                          PickedLocation (userLocation!, selectedAddress!);
+                      final locationData = PickedLocation(
+                          userLocation!.latitude,
+                          userLocation!.longitude,
+                          selectedAddress!);
                       widget.onPickedLocation(locationData);
                       context.read<PageManager>().returnData(locationData);
                     } else {
@@ -151,11 +151,9 @@ class _PickMapScreenState extends State<PickMapScreen> {
 
       setState(() {
         placemark = place;
-        _isLoadingLocation = false;
       });
       defineMarker(userLocation!, selectedStreet!, selectedAddress!);
     } catch (e) {
-      print('Error getting location: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Terjadi kesalahan saat mengambil lokasi.'),
@@ -193,6 +191,7 @@ class _PickMapScreenState extends State<PickMapScreen> {
       placemark = place;
       selectedAddress = address;
       selectedStreet = street;
+      userLocation = latLng;
     });
 
     mapController.animateCamera(
@@ -200,4 +199,3 @@ class _PickMapScreenState extends State<PickMapScreen> {
     );
   }
 }
-

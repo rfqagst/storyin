@@ -2,8 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:http/http.dart' as http;
-import 'package:storyin/data/model/story.dart';
 import 'package:http_parser/http_parser.dart';
+import 'package:storyin/data/response/stories_response.dart';
+import 'package:storyin/data/response/story_detail_response.dart';
 
 class ApiService {
   static const _baseUrl = "https://story-api.dicoding.dev/v1";

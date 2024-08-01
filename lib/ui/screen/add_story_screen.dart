@@ -51,6 +51,7 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
         _resultText = provider.message;
         _resultColor = Colors.green;
       });
+      widget.onStoryUploaded();
     } else if (provider.postState == PostState.error) {
       setState(() {
         _resultText = provider.message;
@@ -219,10 +220,9 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
       await provider.postStory(
         description: _descriptionController.text,
         photo: _image!,
+        lat: _pickedLocation?.latitude,
+        lon: _pickedLocation?.longitude,
       );
-    }
-    if (provider.postState == PostState.success) {
-      widget.onStoryUploaded();
     }
   }
 }

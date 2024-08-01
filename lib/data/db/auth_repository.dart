@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:storyin/data/model/user.dart';
 
@@ -34,7 +36,7 @@ class AuthRepository {
     await Future.delayed(
       const Duration(seconds: 2),
     );
-    return preferences.setString(userKey, user.toJson());
+    return preferences.setString(userKey, jsonEncode(user.toJson()));
   }
 
   Future<bool> deleteUser() async {
@@ -49,12 +51,12 @@ class AuthRepository {
     final preferences = await SharedPreferences.getInstance();
     await Future.delayed(const Duration(seconds: 2));
     final json = preferences.getString(userKey) ?? "";
-    User? user;
+
     try {
-      user = User.fromJson(json);
+      final Map<String, dynamic> userMap = jsonDecode(json);
+      return User.fromJson(userMap);
     } catch (e) {
-      user = null;
+      return null;
     }
-    return user;
   }
 }

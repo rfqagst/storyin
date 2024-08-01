@@ -51,6 +51,16 @@ class _MapScreenState extends State<MapScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(color: Colors.white, boxShadow: [
+            BoxShadow(
+                color: Color.fromARGB(19, 99, 98, 98),
+                offset: Offset(0, 4),
+                blurRadius: 10)
+          ]),
+        ),
         centerTitle: true,
         title: const Text('Story Location'),
       ),

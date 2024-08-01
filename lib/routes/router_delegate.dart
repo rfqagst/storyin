@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:location/location.dart';
 import 'package:storyin/data/db/auth_repository.dart';
 import 'package:storyin/provider/story_provider.dart';
 import 'package:storyin/routes/page_manager.dart';
